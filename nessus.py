@@ -7,7 +7,7 @@ import urllib
 import argparse
 import os
 import xml.etree.cElementTree as ET
-import time
+import time # For converting epoch to normal time
 
 
 ##################
@@ -88,7 +88,7 @@ def newscan():
 		start_time = child.find('start_time').text
 		scan_name = child.find('scan_name').text
 		
-		# Convert the epocj string timestamp into a reable timestamp format
+		# Convert the epoch string timestamp into a reable timestamp format
 		floatedstarttime = float(start_time)
 		truetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(floatedstarttime))
 
@@ -105,7 +105,6 @@ def policies():
 
 	# API Call to get a list of the policies
 	scan = urllib2.urlopen('https://localhost:8834/policy/list', 'token=' + token)
-	print scan.read(10000)
 
 	#Printing the Header
 	print "-----------------------------------------------------------------------"
@@ -119,7 +118,7 @@ def policies():
 		policyid = child.find('policyID').text
 		policyname = child.find('policyName').text
 		policyowner = child.find('policyOwner').text
-		policycomments = child.find('policyComments').text
+		policycomments = child.find('policyContents/policyComments').text
 
 		#Print the Policy Information in format with the header
 		print policyname.ljust(20), policyid.ljust(5), policyowner.ljust(10), policycomments
