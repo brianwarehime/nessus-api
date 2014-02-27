@@ -9,7 +9,6 @@ import os
 import xml.etree.cElementTree as ET
 import time # For converting epoch to normal time
 
-
 ##################
 # LOGIN FUNCTION #
 ##################
@@ -64,19 +63,20 @@ def reports():
 #####################
 
 def newscan():
+	
 	# Retrieving the token from the login() function
 	token = login()
 	
 	# Asking for scan information
-	scanname = raw_input('Name: ')
-	policy = raw_input('Policy: ')
-	target = raw_input('Targets: ')
+	scanname = args.scanname
+	target = args.target
+	policy = args.policy
 	# Manually URL Encoding . to %2E, since urlencode doens't encode .'s
 	x = target.replace('.','%2E')
 
 	# API Call to create a new scan, using the token as authentication, a scan name, the targets, and policy ID
 	scan = urllib2.urlopen('https://localhost:8834/scan/new', 'token=' + token + '&scan%5fname=' + 
-	scanname + '&target=' + x + '&policy%5fid='+ policy)
+	scanname + '&target=' + target + '&policy%5fid='+ policy)
 
 	# Printing the Header
 	print ""
@@ -130,7 +130,6 @@ def policies():
 		#Print the Policy Information in format with the header
 		print policyname.ljust(20), policyid.ljust(5), policyowner.ljust(10), policycomments
 
-
 #################
 # Load Function #
 #################
@@ -142,14 +141,14 @@ def load():
 	# API Call to get load values
 	scan = urllib2.urlopen('https://localhost:8834/server/load', 'token=' + token)
 	
-	#Printing the Header
+	# Printing the Header
 	print ""
 	print "Nessus CLI v1.0"
 	print "---------------------------------------------------------------------------------"
 	print "# Of Scans".ljust(15), "# Of Sessions".ljust(15), "# Of Hosts".ljust(15), "# Of TCP Sessions".ljust(20), "Load Average"		
 	print "---------------------------------------------------------------------------------"
 
-
+	# Parsing XML
 	tree = ET.parse(scan)
 	tree.getroot()
 	for child in tree.iter('load'):
@@ -161,18 +160,30 @@ def load():
 
 		print "    " + numscans.ljust(15), numsessions.ljust(15), numhosts.ljust(15), numtcp.ljust(20), loadavg
 
+##############################
+# Parsing Arguments Function #
+##############################
+
+def parse_args():
+
+	# Option Parsing
+	parser = argparse.ArgumentParser(__file__, description="Nessus CLI")
+	parser.add_argument('-r', '--reports', help='List all reports', action="store_true")
+	parser.add_argument('-n', '--newscan', help='Creates a new scan', action="store_true")
+	parser.add_argument('-p', '--policies',help='List all policies', action="store_true")
+	parser.add_argument('-l', '--load', help='Get the current load', action="store_true")
+	parser.add_argument('--target', help='Specify a target', dest="target")
+	parser.add_argument('--policy', help='Specify a policy', dest="policy")
+	parser.add_argument('--scanname', help='Specify a name for the scan', dest="scanname")
+	args = parser.parse_args()
+	return args
+
 #################
 # Main Function #
 #################
 
-def main():
-	# Option Parser
-	parser = argparse.ArgumentParser(__file__, description="Nessus CLI")
-	parser.add_argument('--reports', '-r', help='List all reports', action="store_true")
-	parser.add_argument('--newscan', '-n', help='Creates a new scan', action="store_true")
-	parser.add_argument('--policies', '-p',help='List all policies', action="store_true")
-	parser.add_argument('--load', '-l',help='Get the current load', action="store_true")
-	args = parser.parse_args()
+if __name__ == '__main__':
+	args = parse_args()
 	if (args.reports):
 		reports()
 	elif (args.newscan):
@@ -181,6 +192,3 @@ def main():
 		policies()
 	elif (args.load):
 		load()
-
-if __name__ == '__main__':
-	main()
