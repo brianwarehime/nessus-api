@@ -10,6 +10,11 @@
         "title": "Test",
         "thumbnail": "./public/content/images/thumbnail.jpg",
         "id": 0
+      },
+      {
+        "title": "Test 2",
+        "thumbnail": "./public/content/images/thumbnail.jpg",
+        "id": 1
       }
     ]
   }
